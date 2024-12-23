@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysql
+
+  mysql:
+    container_name: mysql
+    image: mysql/mysql-server:latest
+    environment:
+      MYSQL_DATABASE: hhplus
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - 3306:3306
+    command:
+      - '--character-set-server=utf8mb4'
+      - '--collation-server=utf8mb4_0900_ai_ci'
