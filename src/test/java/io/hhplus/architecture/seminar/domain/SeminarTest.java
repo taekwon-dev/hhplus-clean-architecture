@@ -13,7 +13,7 @@ class SeminarTest {
     @Test
     void createSeminar() {
         // given
-        Member speaker = MemberFixture.SPEAKER;
+        Member speaker = MemberFixture.SPEAKER();
 
         // when & then
         assertDoesNotThrow(() -> new Seminar(speaker, "description"));

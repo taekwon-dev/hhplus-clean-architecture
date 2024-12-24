@@ -1,7 +1,6 @@
 package io.hhplus.architecture.seminar.repository;
 
 import io.hhplus.architecture.member.domain.Member;
-import io.hhplus.architecture.member.domain.MemberRole;
 import io.hhplus.architecture.member.repository.MemberRepository;
 import io.hhplus.architecture.seminar.domain.Seminar;
 import io.hhplus.architecture.util.RepositoryTest;
@@ -25,7 +24,7 @@ public class SeminarRepositoryTest extends RepositoryTest {
     @Test
     void saveSeminar() {
         //given
-        Member speaker = MemberFixture.SPEAKER;
+        Member speaker = MemberFixture.SPEAKER();
         Member savedSpeaker = memberRepository.save(speaker);
         Seminar seminar = SeminarFixture.create(savedSpeaker);
 
