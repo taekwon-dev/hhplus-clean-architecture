@@ -5,7 +5,7 @@ import io.hhplus.architecture.util.fixture.MemberFixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
 class SeminarTest {
 
@@ -16,6 +16,6 @@ class SeminarTest {
         Member speaker = MemberFixture.SPEAKER();
 
         // when & then
-        assertDoesNotThrow(() -> new Seminar(speaker, "description"));
+        assertThatCode(() -> new Seminar(speaker, "description")).doesNotThrowAnyException();
     }
 }
