@@ -5,7 +5,7 @@ import io.hhplus.architecture.member.domain.MemberRole;
 
 public class MemberFixture {
 
-    public static final Member SPEAKER() {
+    public static Member SPEAKER() {
         return new Member("speaker_name", MemberRole.SPEAKER);
     }
 }
