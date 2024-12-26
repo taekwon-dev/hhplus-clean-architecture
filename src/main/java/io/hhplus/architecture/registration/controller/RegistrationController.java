@@ -17,20 +17,20 @@ public class RegistrationController {
 
     private final RegistrationService registrationService;
 
-    @PostMapping("/registrations/{id}")
+    @PostMapping("/registrations/{userId}")
     public ResponseEntity<Void> registerSchedule(
-            @PathVariable Long id,
+            @PathVariable Long userId,
             @Valid @RequestBody RegistrationRequest request
     ) {
-        long registrationId = registrationService.registerSchedule(id, request);
+        long registrationId = registrationService.registerSchedule(userId, request);
         return ResponseEntity.created(URI.create("/registrations/me/" + registrationId)).build();
     }
 
-    @GetMapping("/registrations/{id}")
+    @GetMapping("/registrations/{userId}")
     public ResponseEntity<List<RegistrationResponse>> findRegistrations(
-            @PathVariable Long id
+            @PathVariable Long userId
     ) {
-        List<RegistrationResponse> response = registrationService.findRegistrations(id);
+        List<RegistrationResponse> response = registrationService.findRegistrations(userId);
         return ResponseEntity.ok(response);
     }
 }

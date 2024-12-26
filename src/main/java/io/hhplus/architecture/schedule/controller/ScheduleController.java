@@ -21,12 +21,12 @@ public class ScheduleController {
     @Value("${grace.period.minutes}")
     private long gracePeriodMinutes;
 
-    @GetMapping("/schedules/{id}")
+    @GetMapping("/schedules/{userId}")
     public ResponseEntity<List<ScheduleResponse>> findAvailableSchedules(
-            @PathVariable Long id
+            @PathVariable Long userId
     ) {
         LocalDateTime gracePeriodDate = LocalDateTime.now().plusMinutes(gracePeriodMinutes);
-        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(id, gracePeriodDate);
+        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(userId, gracePeriodDate);
         return ResponseEntity.ok(response);
     }
 }

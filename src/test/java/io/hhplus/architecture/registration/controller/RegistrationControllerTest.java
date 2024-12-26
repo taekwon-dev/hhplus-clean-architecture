@@ -4,7 +4,6 @@ import io.hhplus.architecture.member.domain.Member;
 import io.hhplus.architecture.member.repository.MemberRepository;
 import io.hhplus.architecture.registration.controller.dto.request.RegistrationRequest;
 import io.hhplus.architecture.registration.controller.dto.response.RegistrationResponse;
-import io.hhplus.architecture.schedule.controller.dto.response.ScheduleResponse;
 import io.hhplus.architecture.schedule.domain.Schedule;
 import io.hhplus.architecture.schedule.repository.ScheduleRepository;
 import io.hhplus.architecture.seminar.domain.Seminar;
