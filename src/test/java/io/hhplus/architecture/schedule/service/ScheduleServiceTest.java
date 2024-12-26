@@ -53,15 +53,15 @@ class ScheduleServiceTest extends ServiceTest {
         Schedule schedule = scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
 
         // when
-        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
+        List<ScheduleResponse> findAvailableSchedules = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
 
         // then
-        assertThat(response.size()).isOne();
-        assertThat(response.get(0).title()).isEqualTo(schedule.getTitle());
-        assertThat(response.get(0).speakerName()).isEqualTo(schedule.getSeminar().getSpeaker().getName());
-        assertThat(response.get(0).description()).isEqualTo(schedule.getSeminar().getDescription());
-        assertThat(response.get(0).startDate()).isEqualTo(schedule.getStartDate());
-        assertThat(response.get(0).endDate()).isEqualTo(schedule.getEndDate());
+        assertThat(findAvailableSchedules.size()).isOne();
+        assertThat(findAvailableSchedules.get(0).title()).isEqualTo(schedule.getTitle());
+        assertThat(findAvailableSchedules.get(0).speakerName()).isEqualTo(schedule.getSeminar().getSpeaker().getName());
+        assertThat(findAvailableSchedules.get(0).description()).isEqualTo(schedule.getSeminar().getDescription());
+        assertThat(findAvailableSchedules.get(0).startDate()).isEqualTo(schedule.getStartDate());
+        assertThat(findAvailableSchedules.get(0).endDate()).isEqualTo(schedule.getEndDate());
     }
 
     @DisplayName("정원이 가득찬 특강 스케줄의 경우, 예약이 불가능하다.")
@@ -78,10 +78,10 @@ class ScheduleServiceTest extends ServiceTest {
         scheduleRepository.save(ScheduleFixture.createWithMaxAttendees(seminar, startDate, endDate));
 
         // when
-        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
+        List<ScheduleResponse> findAvailableSchedules = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
 
         // then
-        assertThat(response.size()).isZero();
+        assertThat(findAvailableSchedules.size()).isZero();
     }
 
     @DisplayName("예약 가능 시간 범위에 특강 스케줄이 없는 경우, 예약이 불가능하다.")
@@ -98,10 +98,10 @@ class ScheduleServiceTest extends ServiceTest {
         scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
 
         // when
-        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
+        List<ScheduleResponse> findAvailableSchedules = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
 
         // then
-        assertThat(response.size()).isZero();
+        assertThat(findAvailableSchedules.size()).isZero();
     }
 
     @DisplayName("이미 예약 완료한 스케줄은 예약이 불가능하다.")
@@ -119,9 +119,9 @@ class ScheduleServiceTest extends ServiceTest {
         registrationService.registerSchedule(audience.getId(), new RegistrationRequest(schedule.getId()));
 
         // when
-        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
+        List<ScheduleResponse> findAvailableSchedules = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
 
         // then
-        assertThat(response.size()).isZero();
+        assertThat(findAvailableSchedules.size()).isZero();
     }
 }
