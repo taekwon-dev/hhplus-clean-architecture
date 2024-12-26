@@ -12,6 +12,7 @@ public class ScheduleMapper {
     public List<ScheduleResponse> mapToScheduleResponse(List<Schedule> schedules) {
         return schedules.stream()
                 .map(schedule -> new ScheduleResponse(
+                        schedule.getId(),
                         schedule.getTitle(),
                         schedule.getSpeakerName(),
                         schedule.getDescription(),

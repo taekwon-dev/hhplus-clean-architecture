@@ -12,6 +12,7 @@ public class RegistrationMapper {
     public List<RegistrationResponse> mapToRegistrationResponse(List<Registration> registrations) {
         return registrations.stream()
                 .map(registration -> new RegistrationResponse(
+                        registration.getSchedule().getId(),
                         registration.getSchedule().getTitle(),
                         registration.getSchedule().getSpeakerName(),
                         registration.getSchedule().getDescription(),

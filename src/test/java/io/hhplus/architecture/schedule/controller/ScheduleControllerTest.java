@@ -57,6 +57,7 @@ class ScheduleControllerTest extends ControllerTest {
 
         // then
         assertThat(response.size()).isOne();
+        assertThat(response.get(0).scheduleId()).isEqualTo(schedule.getId());
         assertThat(response.get(0).title()).isEqualTo(schedule.getTitle());
         assertThat(response.get(0).speakerName()).isEqualTo(schedule.getSpeakerName());
         assertThat(response.get(0).description()).isEqualTo(schedule.getDescription());

@@ -80,9 +80,15 @@ class RegistrationServiceTest extends ServiceTest {
         registrationService.registerSchedule(audience.getId(), new RegistrationRequest(schedule.getId()));
 
         // when
-        List<RegistrationResponse> response = registrationService.findRegistrations(audience.getId());
+        List<RegistrationResponse> findRegistrations = registrationService.findRegistrations(audience.getId());
 
         // then
-        assertThat(response.size()).isOne();
+        assertThat(findRegistrations.size()).isOne();
+        assertThat(findRegistrations.get(0).scheduleId()).isEqualTo(schedule.getId());
+        assertThat(findRegistrations.get(0).title()).isEqualTo(schedule.getTitle());
+        assertThat(findRegistrations.get(0).speakerName()).isEqualTo(schedule.getSeminar().getSpeaker().getName());
+        assertThat(findRegistrations.get(0).description()).isEqualTo(schedule.getSeminar().getDescription());
+        assertThat(findRegistrations.get(0).startDate()).isEqualTo(schedule.getStartDate());
+        assertThat(findRegistrations.get(0).endDate()).isEqualTo(schedule.getEndDate());
     }
 }

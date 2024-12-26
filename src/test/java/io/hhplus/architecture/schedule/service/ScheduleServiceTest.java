@@ -57,6 +57,7 @@ class ScheduleServiceTest extends ServiceTest {
 
         // then
         assertThat(findAvailableSchedules.size()).isOne();
+        assertThat(findAvailableSchedules.get(0).scheduleId()).isEqualTo(schedule.getId());
         assertThat(findAvailableSchedules.get(0).title()).isEqualTo(schedule.getTitle());
         assertThat(findAvailableSchedules.get(0).speakerName()).isEqualTo(schedule.getSeminar().getSpeaker().getName());
         assertThat(findAvailableSchedules.get(0).description()).isEqualTo(schedule.getSeminar().getDescription());
