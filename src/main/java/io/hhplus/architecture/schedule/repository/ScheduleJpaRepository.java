@@ -1,11 +1,14 @@
 package io.hhplus.architecture.schedule.repository;
 
 import io.hhplus.architecture.schedule.domain.Schedule;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ScheduleJpaRepository extends JpaRepository<Schedule, Long> {
 
@@ -16,4 +19,7 @@ public interface ScheduleJpaRepository extends JpaRepository<Schedule, Long> {
             ORDER BY s.startDate DESC, s.id DESC
             """)
     List<Schedule> findAllByUserIdAfterGracePeriod(long userId, LocalDateTime gracePeriodDate);
+
+    @Lock(value = LockModeType.PESSIMISTIC_WRITE)
+    Optional<Schedule> findById(long id);
 }

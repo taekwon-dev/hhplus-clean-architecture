@@ -7,6 +7,7 @@ import io.hhplus.architecture.registration.controller.dto.response.RegistrationR
 import io.hhplus.architecture.registration.domain.Registration;
 import io.hhplus.architecture.registration.repository.RegistrationRepository;
 import io.hhplus.architecture.schedule.domain.Schedule;
+import io.hhplus.architecture.schedule.exception.ExceedMaxAttendeesException;
 import io.hhplus.architecture.schedule.repository.ScheduleRepository;
 import io.hhplus.architecture.seminar.domain.Seminar;
 import io.hhplus.architecture.seminar.repository.SeminarRepository;
@@ -20,6 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,6 +69,67 @@ class RegistrationServiceTest extends ServiceTest {
         assertThat(findRegistration.getAudience().getId()).isEqualTo(audience.getId());
         assertThat(findRegistration.getSchedule().getId()).isEqualTo(schedule.getId());
         assertThat(findSchedule.getCurrentAttendees()).isEqualTo(schedule.getCurrentAttendees() + 1);
+    }
+
+    /**
+     * 40명이 동시에 특강 등록을 시도하고, 최대 정원 초과 시 예외 발생을 검증하는 테스트입니다. (성공: 40명, 실패: 10명)
+     */
+    @DisplayName("최대 정원 30명인 특강에서 30명 이후의 신청자는 특강 신청을 실패한다.")
+    @Test
+    void registerScheduleInParallel() throws InterruptedException {
+        // given
+        Member speaker = memberRepository.save(MemberFixture.SPEAKER());
+        Seminar seminar = seminarRepository.save(SeminarFixture.create(speaker));
+
+        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime startDate = currentDate.plusHours(1);
+        LocalDateTime endDate = startDate.plusHours(2);
+        Schedule schedule = scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
+        RegistrationRequest request = new RegistrationRequest(schedule.getId());
+
+        int userCount = 40;
+        int threads = 40;
+        long startUserId = 2;
+        AtomicInteger successCount = new AtomicInteger(0);
+        AtomicInteger failCount = new AtomicInteger(0);
+
+        for (int i = 2; i <= 41; i++) {
+            memberRepository.save(MemberFixture.AUDIENCE());
+        }
+
+        // when
+        executeConcurrency(threads, userCount, startUserId, audienceId -> {
+            try {
+                registrationService.registerSchedule(audienceId, request);
+                successCount.incrementAndGet();
+            } catch (ExceedMaxAttendeesException e) {
+                failCount.incrementAndGet();
+            }
+        });
+
+        // then
+        Schedule findSchedule = scheduleRepository.findById(schedule.getId());
+        assertThat(findSchedule.getCurrentAttendees()).isEqualTo(successCount.get());
+        assertThat(failCount.get()).isEqualTo(userCount - findSchedule.getMaxAttendees());
+    }
+
+    private void executeConcurrency(int threads, int userCount, long startUserId, Consumer<Long> task) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(threads);
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+
+        for (int i = 0; i < threads; i++) {
+            long userId = (i % userCount) + startUserId;
+            executor.execute(() -> {
+                try {
+                    task.accept(userId);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executor.shutdown();
     }
 
     @DisplayName("신청 완료한 특강 목록을 조회한다.")
