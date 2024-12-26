@@ -2,7 +2,7 @@ package io.hhplus.architecture.schedule.service;
 
 import io.hhplus.architecture.member.domain.Member;
 import io.hhplus.architecture.member.repository.MemberRepository;
-import io.hhplus.architecture.registration.controller.dto.RegistrationRequest;
+import io.hhplus.architecture.registration.controller.dto.request.RegistrationRequest;
 import io.hhplus.architecture.registration.service.RegistrationService;
 import io.hhplus.architecture.schedule.controller.dto.response.ScheduleResponse;
 import io.hhplus.architecture.schedule.domain.Schedule;
@@ -56,7 +56,7 @@ class ScheduleServiceTest extends ServiceTest {
         List<ScheduleResponse> response = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
 
         // then
-        assertThat(response.size()).isEqualTo(1);
+        assertThat(response.size()).isOne();
         assertThat(response.get(0).title()).isEqualTo(schedule.getTitle());
         assertThat(response.get(0).speakerName()).isEqualTo(schedule.getSeminar().getSpeaker().getName());
         assertThat(response.get(0).description()).isEqualTo(schedule.getSeminar().getDescription());

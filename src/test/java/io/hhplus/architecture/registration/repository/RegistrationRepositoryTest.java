@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,7 +35,6 @@ class RegistrationRepositoryTest extends RepositoryTest {
     @Autowired
     private RegistrationRepository registrationRepository;
 
-
     @DisplayName("특강 신청 기록을 저장한다.")
     @Test
     void saveSeminarRegistration() {
@@ -42,6 +42,7 @@ class RegistrationRepositoryTest extends RepositoryTest {
         Member audience = memberRepository.save(MemberFixture.AUDIENCE());
         Member speaker = memberRepository.save(MemberFixture.SPEAKER());
         Seminar seminar = seminarRepository.save(SeminarFixture.create(speaker));
+
         LocalDateTime startDate = LocalDateTime.now();
         LocalDateTime endDate = startDate.plusHours(1);
         Schedule schedule = scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
@@ -52,5 +53,25 @@ class RegistrationRepositoryTest extends RepositoryTest {
         //then
         assertThat(savedRegistration.getAudience()).isEqualTo(audience);
         assertThat(savedRegistration.getSchedule()).isEqualTo(schedule);
+    }
+
+    @DisplayName("신청 완료한 특강 목록을 조회한다.")
+    @Test
+    void findRegistrations() {
+        // given
+        Member audience = memberRepository.save(MemberFixture.AUDIENCE());
+        Member speaker = memberRepository.save(MemberFixture.SPEAKER());
+        Seminar seminar = seminarRepository.save(SeminarFixture.create(speaker));
+
+        LocalDateTime startDate = LocalDateTime.now();
+        LocalDateTime endDate = startDate.plusHours(1);
+        Schedule schedule = scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
+        registrationRepository.save(RegistrationFixture.create(audience, schedule));
+
+        // when
+        List<Registration> findRegistrations = registrationRepository.findAllByAudienceId(audience.getId());
+
+        // then
+        assertThat(findRegistrations.size()).isOne();
     }
 }

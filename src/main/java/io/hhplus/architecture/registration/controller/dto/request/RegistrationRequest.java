@@ -1,4 +1,4 @@
-package io.hhplus.architecture.registration.controller.dto;
+package io.hhplus.architecture.registration.controller.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 

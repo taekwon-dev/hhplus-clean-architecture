@@ -5,6 +5,8 @@ import io.hhplus.architecture.registration.exception.RegistrationNotFoundExcepti
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class RegistrationCoreRepository implements RegistrationRepository {
@@ -19,5 +21,10 @@ public class RegistrationCoreRepository implements RegistrationRepository {
     @Override
     public Registration findById(long id) {
         return jpaRepository.findById(id).orElseThrow(RegistrationNotFoundException::new);
+    }
+
+    @Override
+    public List<Registration> findAllByAudienceId(long userId) {
+        return jpaRepository.findAllByAudienceId(userId);
     }
 }
