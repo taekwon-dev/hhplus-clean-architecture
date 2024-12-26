@@ -10,4 +10,8 @@ public class ScheduleFixture {
     public static Schedule create(Seminar seminar, LocalDateTime startDate, LocalDateTime endDate) {
         return new Schedule(seminar, "TDD 특강", 30, 0, startDate, endDate);
     }
+
+    public static Schedule createWithMaxAttendees(Seminar seminar, LocalDateTime startDate, LocalDateTime endDate) {
+        return new Schedule(seminar, "TDD 특강", 30, 30, startDate, endDate);
+    }
 }

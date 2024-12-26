@@ -8,5 +8,5 @@ import org.springframework.context.annotation.Import;
 
 @DataJpaTest
 @Import({MemberCoreRepository.class, SeminarCoreRepository.class, ScheduleCoreRepository.class})
-public class RepositoryTest {
+public abstract class RepositoryTest {
 }
