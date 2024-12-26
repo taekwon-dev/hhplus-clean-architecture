@@ -9,7 +9,7 @@ public interface ScheduleRepository {
 
     Schedule save(Schedule schedule);
 
-    List<Schedule> findAvailableSchedules(LocalDateTime gracePeriodDate);
+    List<Schedule> findAvailableSchedules(long userIdm, LocalDateTime gracePeriodDate);
 
     Schedule findById(long id);
 }

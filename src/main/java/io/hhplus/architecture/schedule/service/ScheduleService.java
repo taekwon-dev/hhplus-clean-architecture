@@ -19,8 +19,8 @@ public class ScheduleService {
     private final ScheduleMapper scheduleMapper;
 
     @Transactional(readOnly = true)
-    public List<ScheduleResponse> findAvailableSchedules(LocalDateTime gracePeriodDate) {
-        List<Schedule> schedules = scheduleRepository.findAvailableSchedules(gracePeriodDate);
+    public List<ScheduleResponse> findAvailableSchedules(long userId, LocalDateTime gracePeriodDate) {
+        List<Schedule> schedules = scheduleRepository.findAvailableSchedules(userId, gracePeriodDate);
         return scheduleMapper.mapToScheduleResponse(schedules);
     }
 }

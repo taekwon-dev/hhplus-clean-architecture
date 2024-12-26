@@ -11,8 +11,9 @@ public interface ScheduleJpaRepository extends JpaRepository<Schedule, Long> {
 
     @Query("""
             SELECT s FROM Schedule s
-            WHERE s.startDate >= :gracePeriodDate AND s.maxAttendees > s.currentAttendees
+            LEFT JOIN Registration r ON r.schedule.id = s.id AND r.audience.id =:userId
+            WHERE s.startDate >= :gracePeriodDate AND s.maxAttendees > s.currentAttendees AND r IS NULL
             ORDER BY s.startDate DESC, s.id DESC
             """)
-    List<Schedule> findAllByUserIdAfterGracePeriod(LocalDateTime gracePeriodDate);
+    List<Schedule> findAllByUserIdAfterGracePeriod(long userId, LocalDateTime gracePeriodDate);
 }

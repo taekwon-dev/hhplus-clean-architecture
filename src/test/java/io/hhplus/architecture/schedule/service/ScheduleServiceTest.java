@@ -2,6 +2,8 @@ package io.hhplus.architecture.schedule.service;
 
 import io.hhplus.architecture.member.domain.Member;
 import io.hhplus.architecture.member.repository.MemberRepository;
+import io.hhplus.architecture.registration.controller.dto.RegistrationRequest;
+import io.hhplus.architecture.registration.service.RegistrationService;
 import io.hhplus.architecture.schedule.controller.dto.response.ScheduleResponse;
 import io.hhplus.architecture.schedule.domain.Schedule;
 import io.hhplus.architecture.schedule.repository.ScheduleRepository;
@@ -32,12 +34,16 @@ class ScheduleServiceTest extends ServiceTest {
     private ScheduleRepository scheduleRepository;
 
     @Autowired
+    private RegistrationService registrationService;
+
+    @Autowired
     private ScheduleService scheduleService;
 
     @DisplayName("예약 가능한 특강 스케줄을 조회한다.")
     @Test
     void findAvailableSchedules() {
         // given
+        Member audience = memberRepository.save(MemberFixture.AUDIENCE());
         Member speaker = memberRepository.save(MemberFixture.SPEAKER());
         Seminar seminar = seminarRepository.save(SeminarFixture.create(speaker));
 
@@ -47,7 +53,7 @@ class ScheduleServiceTest extends ServiceTest {
         Schedule schedule = scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
 
         // when
-        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(currentDate);
+        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
 
         // then
         assertThat(response.size()).isEqualTo(1);
@@ -62,6 +68,7 @@ class ScheduleServiceTest extends ServiceTest {
     @Test
     void findAvailableSchedules_WhenFullyApplied() {
         // given
+        Member audience = memberRepository.save(MemberFixture.AUDIENCE());
         Member speaker = memberRepository.save(MemberFixture.SPEAKER());
         Seminar seminar = seminarRepository.save(SeminarFixture.create(speaker));
 
@@ -71,7 +78,7 @@ class ScheduleServiceTest extends ServiceTest {
         scheduleRepository.save(ScheduleFixture.createWithMaxAttendees(seminar, startDate, endDate));
 
         // when
-        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(currentDate);
+        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
 
         // then
         assertThat(response.size()).isZero();
@@ -81,6 +88,7 @@ class ScheduleServiceTest extends ServiceTest {
     @Test
     void findAvailableSchedules_WhenAllBeforeGracePeriodDate() {
         // given
+        Member audience = memberRepository.save(MemberFixture.AUDIENCE());
         Member speaker = memberRepository.save(MemberFixture.SPEAKER());
         Seminar seminar = seminarRepository.save(SeminarFixture.create(speaker));
 
@@ -90,7 +98,28 @@ class ScheduleServiceTest extends ServiceTest {
         scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
 
         // when
-        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(currentDate);
+        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
+
+        // then
+        assertThat(response.size()).isZero();
+    }
+
+    @DisplayName("이미 예약 완료한 스케줄은 예약이 불가능하다.")
+    @Test
+    void findAvailableSchedules_WhenAlreadyRegisteredSchedule() {
+        // given
+        Member audience = memberRepository.save(MemberFixture.AUDIENCE());
+        Member speaker = memberRepository.save(MemberFixture.SPEAKER());
+        Seminar seminar = seminarRepository.save(SeminarFixture.create(speaker));
+
+        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime startDate = currentDate.minusHours(1);
+        LocalDateTime endDate = startDate.plusHours(2);
+        Schedule schedule = scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
+        registrationService.registerSchedule(audience.getId(), new RegistrationRequest(schedule.getId()));
+
+        // when
+        List<ScheduleResponse> response = scheduleService.findAvailableSchedules(audience.getId(), currentDate);
 
         // then
         assertThat(response.size()).isZero();

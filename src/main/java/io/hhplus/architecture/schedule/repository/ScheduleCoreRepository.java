@@ -20,8 +20,8 @@ public class ScheduleCoreRepository implements ScheduleRepository {
     }
 
     @Override
-    public List<Schedule> findAvailableSchedules(LocalDateTime gracePeriodDate) {
-        return jpaRepository.findAllByUserIdAfterGracePeriod(gracePeriodDate);
+    public List<Schedule> findAvailableSchedules(long userId, LocalDateTime gracePeriodDate) {
+        return jpaRepository.findAllByUserIdAfterGracePeriod(userId, gracePeriodDate);
     }
 
     @Override
