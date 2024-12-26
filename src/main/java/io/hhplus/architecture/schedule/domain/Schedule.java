@@ -63,6 +63,10 @@ public class Schedule extends BaseEntity {
         }
     }
 
+    public void incrementCurrentAttendees() {
+        this.currentAttendees++;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

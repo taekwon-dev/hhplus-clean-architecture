@@ -1,6 +1,7 @@
 package io.hhplus.architecture.schedule.repository;
 
 import io.hhplus.architecture.schedule.domain.Schedule;
+import io.hhplus.architecture.schedule.exception.ScheduleNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -21,5 +22,10 @@ public class ScheduleCoreRepository implements ScheduleRepository {
     @Override
     public List<Schedule> findAvailableSchedules(LocalDateTime gracePeriodDate) {
         return jpaRepository.findAllByUserIdAfterGracePeriod(gracePeriodDate);
+    }
+
+    @Override
+    public Schedule findById(long id) {
+        return jpaRepository.findById(id).orElseThrow(ScheduleNotFoundException::new);
     }
 }

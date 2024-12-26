@@ -10,4 +10,6 @@ public interface ScheduleRepository {
     Schedule save(Schedule schedule);
 
     List<Schedule> findAvailableSchedules(LocalDateTime gracePeriodDate);
+
+    Schedule findById(long id);
 }
