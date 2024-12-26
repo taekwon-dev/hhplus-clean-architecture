@@ -5,6 +5,7 @@ import io.hhplus.architecture.member.repository.MemberRepository;
 import io.hhplus.architecture.registration.controller.dto.request.RegistrationRequest;
 import io.hhplus.architecture.registration.controller.dto.response.RegistrationResponse;
 import io.hhplus.architecture.registration.domain.Registration;
+import io.hhplus.architecture.registration.exception.AlreadyRegisteredException;
 import io.hhplus.architecture.registration.repository.RegistrationRepository;
 import io.hhplus.architecture.registration.service.mapper.RegistrationMapper;
 import io.hhplus.architecture.schedule.domain.Schedule;
@@ -30,6 +31,7 @@ public class RegistrationService {
         Member audience = memberRepository.findById(userId);
         Schedule schedule = scheduleRepository.findById(request.scheduleId());
         validateExceedMaxAttendees(schedule);
+        validateAlreadyRegistered(audience, schedule);
         schedule.incrementCurrentAttendees();
 
         Registration registration = registrationRepository.save(new Registration(audience, schedule));
@@ -39,6 +41,12 @@ public class RegistrationService {
     private void validateExceedMaxAttendees(Schedule schedule) {
         if (schedule.getCurrentAttendees() >= schedule.getMaxAttendees()) {
             throw new ExceedMaxAttendeesException();
+        }
+    }
+
+    private void validateAlreadyRegistered(Member audience, Schedule schedule) {
+        if (registrationRepository.existsByAudienceAndSchedule(audience, schedule)) {
+            throw new AlreadyRegisteredException();
         }
     }
 

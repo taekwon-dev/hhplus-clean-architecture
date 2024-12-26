@@ -5,6 +5,7 @@ import io.hhplus.architecture.member.repository.MemberRepository;
 import io.hhplus.architecture.registration.controller.dto.request.RegistrationRequest;
 import io.hhplus.architecture.registration.controller.dto.response.RegistrationResponse;
 import io.hhplus.architecture.registration.domain.Registration;
+import io.hhplus.architecture.registration.exception.AlreadyRegisteredException;
 import io.hhplus.architecture.registration.repository.RegistrationRepository;
 import io.hhplus.architecture.schedule.domain.Schedule;
 import io.hhplus.architecture.schedule.exception.ExceedMaxAttendeesException;
@@ -76,7 +77,7 @@ class RegistrationServiceTest extends ServiceTest {
      */
     @DisplayName("최대 정원 30명인 특강에서 30명 이후의 신청자는 특강 신청을 실패한다.")
     @Test
-    void registerScheduleInParallel() throws InterruptedException {
+    void registerScheduleConcurrently_FailureAfterMaxCapacity() throws InterruptedException {
         // given
         Member speaker = memberRepository.save(MemberFixture.SPEAKER());
         Seminar seminar = seminarRepository.save(SeminarFixture.create(speaker));
@@ -128,6 +129,57 @@ class RegistrationServiceTest extends ServiceTest {
             });
         }
 
+        latch.await();
+        executor.shutdown();
+    }
+
+    /**
+     * 한 명이 동시에 5번 특강 등록을 시도, 최초 예약 성공을 제외하고 나머지 요청에 대해서는 예외가 발생함을 검증하는 테스트입니다. (성공: 1번, 실패: 4번)
+     */
+    @DisplayName("동일한 유저가 같은 특강을 동시에 5번 신청 했을 때 최초 한 번 성공을 제외하고는 특강 신청에 실패한다.")
+    @Test
+    void registerScheduleConcurrently_OnlyFirstSucceeds() throws InterruptedException {
+        // given
+        Member audience = memberRepository.save(MemberFixture.AUDIENCE());
+        Member speaker = memberRepository.save(MemberFixture.SPEAKER());
+        Seminar seminar = seminarRepository.save(SeminarFixture.create(speaker));
+
+        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime startDate = currentDate.plusHours(1);
+        LocalDateTime endDate = startDate.plusHours(2);
+        Schedule schedule = scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
+        RegistrationRequest request = new RegistrationRequest(schedule.getId());
+
+        int threads = 5;
+        AtomicInteger successCount = new AtomicInteger(0);
+        AtomicInteger failCount = new AtomicInteger(0);
+
+        // when
+        executeConcurrency(threads, () -> {
+            try {
+                registrationService.registerSchedule(audience.getId(), request);
+                successCount.incrementAndGet();
+            } catch (AlreadyRegisteredException e) {
+                failCount.incrementAndGet();
+            }
+        });
+
+        // then
+        Schedule findSchedule = scheduleRepository.findById(schedule.getId());
+        assertThat(findSchedule.getCurrentAttendees()).isEqualTo(successCount.get());
+        assertThat(failCount.get()).isEqualTo(threads - successCount.get());
+    }
+
+
+    private void executeConcurrency(int threads, Runnable task) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(threads);
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+        for (int i = 0; i < threads; i++) {
+            executor.execute(() -> {
+                task.run();
+                latch.countDown();
+            });
+        }
         latch.await();
         executor.shutdown();
     }

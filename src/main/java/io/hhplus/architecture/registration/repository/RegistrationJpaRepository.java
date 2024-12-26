@@ -1,6 +1,8 @@
 package io.hhplus.architecture.registration.repository;
 
+import io.hhplus.architecture.member.domain.Member;
 import io.hhplus.architecture.registration.domain.Registration;
+import io.hhplus.architecture.schedule.domain.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -14,4 +16,6 @@ public interface RegistrationJpaRepository extends JpaRepository<Registration, L
             WHERE r.audience.id = :userId
             """)
     List<Registration> findAllByAudienceId(long userId);
+
+    boolean existsByAudienceAndSchedule(Member audience, Schedule schedule);
 }

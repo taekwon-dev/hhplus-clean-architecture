@@ -1,7 +1,9 @@
 package io.hhplus.architecture.registration.repository;
 
+import io.hhplus.architecture.member.domain.Member;
 import io.hhplus.architecture.registration.domain.Registration;
 import io.hhplus.architecture.registration.exception.RegistrationNotFoundException;
+import io.hhplus.architecture.schedule.domain.Schedule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -26,5 +28,10 @@ public class RegistrationCoreRepository implements RegistrationRepository {
     @Override
     public List<Registration> findAllByAudienceId(long userId) {
         return jpaRepository.findAllByAudienceId(userId);
+    }
+
+    @Override
+    public boolean existsByAudienceAndSchedule(Member audience, Schedule schedule) {
+        return jpaRepository.existsByAudienceAndSchedule(audience, schedule);
     }
 }
