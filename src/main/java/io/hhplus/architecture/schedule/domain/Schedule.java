@@ -26,6 +26,10 @@ public class Schedule extends BaseEntity {
 
     private String title;
 
+    private String speakerName;
+
+    private String description;
+
     private Integer maxAttendees;
 
     private Integer currentAttendees;
@@ -39,6 +43,8 @@ public class Schedule extends BaseEntity {
     public Schedule(
             Seminar seminar,
             String title,
+            String speakerName,
+            String description,
             Integer maxAttendees,
             Integer currentAttendees,
             LocalDateTime startDate,
@@ -46,6 +52,8 @@ public class Schedule extends BaseEntity {
     ) {
         validateDate(startDate, endDate);
         this.title = title;
+        this.speakerName = speakerName;
+        this.description = description;
         this.seminar = seminar;
         this.maxAttendees = maxAttendees;
         this.currentAttendees = currentAttendees;

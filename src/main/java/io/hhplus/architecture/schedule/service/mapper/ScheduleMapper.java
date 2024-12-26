@@ -13,8 +13,8 @@ public class ScheduleMapper {
         return schedules.stream()
                 .map(schedule -> new ScheduleResponse(
                         schedule.getTitle(),
-                        schedule.getSeminar().getSpeaker().getName(),
-                        schedule.getSeminar().getDescription(),
+                        schedule.getSpeakerName(),
+                        schedule.getDescription(),
                         schedule.getStartDate(),
                         schedule.getEndDate()
                 )).toList();

@@ -28,7 +28,7 @@ class ScheduleTest {
         int currentAttendees = 0;
 
         // when & then
-        assertThatCode(() -> new Schedule(seminar, title, maxAttendees, currentAttendees, startDate, endDate))
+        assertThatCode(() -> new Schedule(seminar, title, speaker.getName(), seminar.getDescription(), maxAttendees, currentAttendees, startDate, endDate))
                 .doesNotThrowAnyException();
     }
 
@@ -45,7 +45,7 @@ class ScheduleTest {
         int currentAttendees = 0;
 
         // when & then
-        assertThatThrownBy(() -> new Schedule(seminar, title, maxAttendees, currentAttendees, startDate, endDate))
+        assertThatThrownBy(() -> new Schedule(seminar, title, speaker.getName(), seminar.getDescription(), maxAttendees, currentAttendees, startDate, endDate))
                 .isInstanceOf(StartDateAfterEndDateException.class);
     }
 }

@@ -13,8 +13,8 @@ public class RegistrationMapper {
         return registrations.stream()
                 .map(registration -> new RegistrationResponse(
                         registration.getSchedule().getTitle(),
-                        registration.getSchedule().getSeminar().getSpeaker().getName(),
-                        registration.getSchedule().getSeminar().getDescription(),
+                        registration.getSchedule().getSpeakerName(),
+                        registration.getSchedule().getDescription(),
                         registration.getSchedule().getStartDate(),
                         registration.getSchedule().getEndDate()
                 )).toList();
