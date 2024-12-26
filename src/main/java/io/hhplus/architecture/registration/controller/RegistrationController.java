@@ -5,10 +5,12 @@ import io.hhplus.architecture.registration.controller.dto.response.RegistrationR
 import io.hhplus.architecture.registration.service.RegistrationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -17,12 +19,16 @@ public class RegistrationController {
 
     private final RegistrationService registrationService;
 
+    @Value("${grace.period.minutes}")
+    private long gracePeriodMinutes;
+
     @PostMapping("/registrations/{userId}")
     public ResponseEntity<Void> registerSchedule(
             @PathVariable Long userId,
             @Valid @RequestBody RegistrationRequest request
     ) {
-        long registrationId = registrationService.registerSchedule(userId, request);
+        LocalDateTime gracePeriodDate = LocalDateTime.now().plusMinutes(gracePeriodMinutes);
+        long registrationId = registrationService.registerSchedule(userId, request, gracePeriodDate);
         return ResponseEntity.created(URI.create("/registrations/me/" + registrationId)).build();
     }
 

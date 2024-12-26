@@ -6,6 +6,7 @@ import io.hhplus.architecture.registration.controller.dto.request.RegistrationRe
 import io.hhplus.architecture.registration.controller.dto.response.RegistrationResponse;
 import io.hhplus.architecture.registration.domain.Registration;
 import io.hhplus.architecture.registration.exception.AlreadyRegisteredException;
+import io.hhplus.architecture.registration.exception.InvalidScheduleException;
 import io.hhplus.architecture.registration.repository.RegistrationRepository;
 import io.hhplus.architecture.registration.service.mapper.RegistrationMapper;
 import io.hhplus.architecture.schedule.domain.Schedule;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -27,11 +29,14 @@ public class RegistrationService {
     private final RegistrationMapper registrationMapper;
 
     @Transactional
-    public long registerSchedule(long userId, RegistrationRequest request) {
+    public long registerSchedule(long userId, RegistrationRequest request, LocalDateTime gracePeriodDate) {
         Member audience = memberRepository.findById(userId);
         Schedule schedule = scheduleRepository.findById(request.scheduleId());
+
         validateExceedMaxAttendees(schedule);
         validateAlreadyRegistered(audience, schedule);
+        validateIsAfterGracePeriod(schedule, gracePeriodDate);
+
         schedule.incrementCurrentAttendees();
 
         Registration registration = registrationRepository.save(new Registration(audience, schedule));
@@ -47,6 +52,12 @@ public class RegistrationService {
     private void validateAlreadyRegistered(Member audience, Schedule schedule) {
         if (registrationRepository.existsByAudienceAndSchedule(audience, schedule)) {
             throw new AlreadyRegisteredException();
+        }
+    }
+
+    private void validateIsAfterGracePeriod(Schedule schedule, LocalDateTime gracePeriodDate) {
+        if (!schedule.getStartDate().isAfter(gracePeriodDate)) {
+            throw new InvalidScheduleException();
         }
     }
 

@@ -114,10 +114,10 @@ class ScheduleServiceTest extends ServiceTest {
         Seminar seminar = seminarRepository.save(SeminarFixture.create(speaker));
 
         LocalDateTime currentDate = LocalDateTime.now();
-        LocalDateTime startDate = currentDate.minusHours(1);
+        LocalDateTime startDate = currentDate.plusHours(1);
         LocalDateTime endDate = startDate.plusHours(2);
         Schedule schedule = scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
-        registrationService.registerSchedule(audience.getId(), new RegistrationRequest(schedule.getId()));
+        registrationService.registerSchedule(audience.getId(), new RegistrationRequest(schedule.getId()), LocalDateTime.now());
 
         // when
         List<ScheduleResponse> findAvailableSchedules = scheduleService.findAvailableSchedules(audience.getId(), currentDate);

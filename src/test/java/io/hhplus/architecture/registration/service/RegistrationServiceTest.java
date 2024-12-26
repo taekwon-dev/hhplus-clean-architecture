@@ -6,6 +6,7 @@ import io.hhplus.architecture.registration.controller.dto.request.RegistrationRe
 import io.hhplus.architecture.registration.controller.dto.response.RegistrationResponse;
 import io.hhplus.architecture.registration.domain.Registration;
 import io.hhplus.architecture.registration.exception.AlreadyRegisteredException;
+import io.hhplus.architecture.registration.exception.InvalidScheduleException;
 import io.hhplus.architecture.registration.repository.RegistrationRepository;
 import io.hhplus.architecture.schedule.domain.Schedule;
 import io.hhplus.architecture.schedule.exception.ExceedMaxAttendeesException;
@@ -29,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RegistrationServiceTest extends ServiceTest {
 
@@ -61,7 +63,7 @@ class RegistrationServiceTest extends ServiceTest {
         Schedule schedule = scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
 
         // when
-        long registrationId = registrationService.registerSchedule(audience.getId(), new RegistrationRequest(schedule.getId()));
+        long registrationId = registrationService.registerSchedule(audience.getId(), new RegistrationRequest(schedule.getId()), LocalDateTime.now());
         
         // then
         Registration findRegistration = registrationRepository.findById(registrationId);
@@ -70,6 +72,25 @@ class RegistrationServiceTest extends ServiceTest {
         assertThat(findRegistration.getAudience().getId()).isEqualTo(audience.getId());
         assertThat(findRegistration.getSchedule().getId()).isEqualTo(schedule.getId());
         assertThat(findSchedule.getCurrentAttendees()).isEqualTo(schedule.getCurrentAttendees() + 1);
+    }
+
+    @DisplayName("특강 신청 시점 기준 Grace Period(30분) 이내에 시작하는 특강 신청은 실패한다.")
+    @Test
+    void registerSchedule_FailureIsBeforeGracePeriod() {
+        // given
+        Member audience = memberRepository.save(MemberFixture.AUDIENCE());
+        Member speaker = memberRepository.save(MemberFixture.SPEAKER());
+        Seminar seminar = seminarRepository.save(SeminarFixture.create(speaker));
+
+        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime startDate = currentDate.plusMinutes(15);
+        LocalDateTime endDate = startDate.plusHours(2);
+        Schedule schedule = scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
+        RegistrationRequest registrationRequest = new RegistrationRequest(schedule.getId());
+
+        // when & then
+        assertThatThrownBy(() -> registrationService.registerSchedule(audience.getId(), registrationRequest, LocalDateTime.now().plusMinutes(30)))
+                .isInstanceOf(InvalidScheduleException.class);
     }
 
     /**
@@ -101,7 +122,7 @@ class RegistrationServiceTest extends ServiceTest {
         // when
         executeConcurrency(threads, userCount, startUserId, audienceId -> {
             try {
-                registrationService.registerSchedule(audienceId, request);
+                registrationService.registerSchedule(audienceId, request, LocalDateTime.now());
                 successCount.incrementAndGet();
             } catch (ExceedMaxAttendeesException e) {
                 failCount.incrementAndGet();
@@ -157,7 +178,7 @@ class RegistrationServiceTest extends ServiceTest {
         // when
         executeConcurrency(threads, () -> {
             try {
-                registrationService.registerSchedule(audience.getId(), request);
+                registrationService.registerSchedule(audience.getId(), request, LocalDateTime.now());
                 successCount.incrementAndGet();
             } catch (AlreadyRegisteredException e) {
                 failCount.incrementAndGet();
@@ -196,7 +217,7 @@ class RegistrationServiceTest extends ServiceTest {
         LocalDateTime startDate = currentDate.plusHours(1);
         LocalDateTime endDate = startDate.plusHours(2);
         Schedule schedule = scheduleRepository.save(ScheduleFixture.create(seminar, startDate, endDate));
-        registrationService.registerSchedule(audience.getId(), new RegistrationRequest(schedule.getId()));
+        registrationService.registerSchedule(audience.getId(), new RegistrationRequest(schedule.getId()), LocalDateTime.now());
 
         // when
         List<RegistrationResponse> findRegistrations = registrationService.findRegistrations(audience.getId());
